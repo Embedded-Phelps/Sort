@@ -12,10 +12,19 @@
 #include <stdlib.h>
 
 /*********************************** Macros ***********************************/
+#define TEST (0)
+
+#if TEST == 0
+#define TOTAL_DATA_NUM  (8)
+#define NUM_WAYS        (2)
+#define RUN_SIZE        (4)
+#define BLOCK_SIZE      (2)
+#else
 #define TOTAL_DATA_NUM  (1048576)
 #define NUM_WAYS        (128)
 #define RUN_SIZE        (8129)
 #define BLOCK_SIZE      (64)
+#endif
 
 #define UNINT_MAX       (0xFFFFFFFF)
 
@@ -43,7 +52,7 @@ typedef struct MinHeap
 /* @Function Name: externalSort
  * @Inputs:
  *  - input_file: name of the input data file to sort
- *  - output_file: name of the sorted file
+ *  - output_file: name of the output file
  *  - num_ways: number of runs to be merged
  *  - run_size: size of a run (can fit in RAM)
  * @Description:
@@ -54,8 +63,7 @@ typedef struct MinHeap
  *         b) Store the sorted run in a temperary file on disk
  *  2) Merge the sorted files using 'K-way Merge' algorithm
  */
-void externalSort(char * input_file, char * output_file,
-             unsigned int num_ways, unsigned int run_size);
+void externalSort(char * input_file, char * output_file, unsigned int num_ways, unsigned int run_size);
 
 /* @Function Name: findMatch
  * @Inputs:
@@ -87,14 +95,15 @@ MinHeap_t MinHeap_constructHeap(MinHeapNode_t * a, unsigned int size);
 
 int main(int argc, char ** argv)
 {
-    /* Read input file */
+    char sorted_file[] = "sorted.bin";
     
+    if (argc == 1) {printf("ERROR: no input file.\n"); exit(-1);}
     
     /* Read user-input testcases */
     
     
-    /* Sorting the data file in ascending order */
-    //externalSort();
+    /* Sorting the input data file in ascending order and write to the 'sorted_file' */
+    externalSort(*(argv+1), sorted_file, NUM_WAYS, RUN_SIZE);
     
     /* Find matching number for each testcase */
     //result = findMatch();
@@ -102,8 +111,7 @@ int main(int argc, char ** argv)
     return 0;
 }
 
-void externalSort(char * input_file, char * output_file,
-                  unsigned int num_ways, unsigned int run_size)
+void externalSort(char * input_file, char * output_file, unsigned int num_ways, unsigned int run_size)
 {
     FILE * pdata_file, * ptemp_file;
     unsigned int n, count;
