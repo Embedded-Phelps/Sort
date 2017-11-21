@@ -96,18 +96,34 @@ MinHeap_t MinHeap_constructHeap(MinHeapNode_t * a, unsigned int size);
 int main(int argc, char ** argv)
 {
     char sorted_file[] = "sorted.bin";
+    unsigned int num_testcase, i;
+    unsigned int * user_testcase;
     
-    if (argc == 1) {printf("ERROR: no input file.\n"); exit(-1);}
+    if(argc == 1) {printf("ERROR: no input file.\n"); exit(-1);}
     
     /* Read user-input testcases */
+    scanf("%u", &num_testcase);
+    //printf("%u\n", num_testcase);
     
+    user_testcase = (unsigned int *)malloc(sizeof(unsigned int)*num_testcase);
+    if(!user_testcase) {printf("ERROR: testcases buffer not suscessfully allocated.\n"); exit(-1);}
+    
+    for(i=0; i<num_testcase; i++)
+    {
+        scanf("%u", user_testcase+i);
+    }
+    
+//    for(i=0; i<num_testcase; i++)
+//    {
+//        printf("%u\n", *(user_testcase+i));
+//    }
     
     /* Sorting the input data file in ascending order and write to the 'sorted_file' */
     externalSort(*(argv+1), sorted_file, NUM_WAYS, RUN_SIZE);
     
     /* Find matching number for each testcase */
     //result = findMatch();
-    
+    free(user_testcase);
     return 0;
 }
 
