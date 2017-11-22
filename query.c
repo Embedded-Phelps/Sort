@@ -12,17 +12,17 @@
 #include <stdlib.h>
 
 /*********************************** Macros ***********************************/
-#define TEST (0)
+#define TEST (1)
 
-#if TEST == 0
-#define TOTAL_DATA_NUM  (8)
-#define NUM_WAYS        (2)
-#define RUN_SIZE        (4)
-#define BLOCK_SIZE      (2)
-#else
+#if TEST == 1
 #define TOTAL_DATA_NUM  (1048576)
 #define NUM_WAYS        (128)
-#define RUN_SIZE        (8129)
+#define RUN_SIZE        (8192)
+#define BLOCK_SIZE      (64)
+#else
+#define TOTAL_DATA_NUM  (16384)
+#define NUM_WAYS        (64)
+#define RUN_SIZE        (4096)
 #define BLOCK_SIZE      (64)
 #endif
 
@@ -100,19 +100,6 @@ int main(int argc, char ** argv)
     unsigned int * user_testcase;
     
     if(argc == 1) {printf("ERROR: no input file.\n"); exit(-1);}
-    
-//    FILE* pdata_file;
-//    unsigned int temp;
-//    pdata_file = fopen("sorted.bin", "rb");
-//    fseek(pdata_file, 3*sizeof(unsigned int), SEEK_SET);
-//    fread(&temp, sizeof(unsigned int), 1, pdata_file);
-//    printf("%u\n", temp);
-//    fseek(pdata_file, 6*sizeof(unsigned int), SEEK_SET);
-//    fread(&temp, sizeof(unsigned int), 1, pdata_file);
-//    printf("%u\n", temp);
-//    fseek(pdata_file, 2*sizeof(unsigned int), SEEK_SET);
-//    fread(&temp, sizeof(unsigned int), 1, pdata_file);
-//    printf("%u\n", temp);
 
     /* Read user-input testcases */
     scanf("%u", &num_testcase);
@@ -127,7 +114,7 @@ int main(int argc, char ** argv)
 
     /* Sorting the input data file in ascending order and write to the 'sorted_file' */
     externalSort(*(argv+1), sorted_file, NUM_WAYS, RUN_SIZE);
-
+    
     /* Find the matching number for each testcase and print it out*/
     for(i=0; i<num_testcase; i++)
     {
@@ -146,7 +133,7 @@ void externalSort(char * input_file, char * output_file, unsigned int num_ways, 
     unsigned int n, count;
     size_t result;
     unsigned int buffer[BLOCK_SIZE*(num_ways+1)];
-    char temp_filename[11];
+    char temp_filename[12];
     MinHeapNode_t harr_n[num_ways], root;
     MinHeap_t mp;
     unsigned int * output;
@@ -177,7 +164,6 @@ void externalSort(char * input_file, char * output_file, unsigned int num_ways, 
     }
     // Close the input file
     fclose(pdata_file);
-    
     /* 2nd Pass: Merge the sorted 'num_ways' files into a single file in ascending order */
     
     // Read a block data from all temp data files into a corresponding array
@@ -204,9 +190,9 @@ void externalSort(char * input_file, char * output_file, unsigned int num_ways, 
     mp = MinHeap_constructHeap(harr_n, num_ways);
     
     // Open the output file for writes
-    pdata_file = fopen(output_file, "ab");
+    pdata_file = fopen(output_file, "ab+");
     if(!pdata_file) {fputs ("Write File error", stderr); exit(1);}
-    
+
     for (n=0; n<(TOTAL_DATA_NUM/BLOCK_SIZE); n++)
     {
         for (count=0; count<BLOCK_SIZE; count++)
@@ -250,7 +236,7 @@ void externalSort(char * input_file, char * output_file, unsigned int num_ways, 
         fwrite(output, sizeof(unsigned int), BLOCK_SIZE, pdata_file);
     }
     // Close the file
-    fclose(pdata_file);
+    result = fclose(pdata_file);
 }
 
 unsigned int findMatch(char * data_file, unsigned int testcase)
