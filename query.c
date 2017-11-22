@@ -20,10 +20,10 @@
 #define RUN_SIZE        (8192)
 #define BLOCK_SIZE      (64)
 #else
-#define TOTAL_DATA_NUM  (16384)
-#define NUM_WAYS        (64)
-#define RUN_SIZE        (4096)
-#define BLOCK_SIZE      (64)
+#define TOTAL_DATA_NUM  (1048576)
+#define NUM_WAYS        (512)
+#define RUN_SIZE        (2048)
+#define BLOCK_SIZE      (4)
 #endif
 
 #define UNINT_MAX       (0xFFFFFFFF)
@@ -103,10 +103,8 @@ int main(int argc, char ** argv)
 
     /* Read user-input testcases */
     scanf("%u", &num_testcase);
-
     user_testcase = (unsigned int *)malloc(sizeof(unsigned int)*num_testcase);
     if(!user_testcase) {printf("ERROR: testcases buffer not suscessfully allocated.\n"); exit(-1);}
-
     for(i=0; i<num_testcase; i++)
     {
         scanf("%u", user_testcase+i);
@@ -121,9 +119,9 @@ int main(int argc, char ** argv)
         *(user_testcase+i) = findMatch(sorted_file, *(user_testcase+i));
         printf("%u\n", *(user_testcase+i));
     }
-
     /* Free the buffer */
     free(user_testcase);
+    
     return 0;
 }
 
@@ -256,7 +254,10 @@ unsigned int findMatch(char * data_file, unsigned int testcase)
         fseek(pdata_file, mid*sizeof(unsigned int), SEEK_SET);
         fread(temp, sizeof(unsigned int), 1, pdata_file);
         if(temp[0] == testcase)
+        {
+            fclose(pdata_file);
             return temp[0];
+        }
         else if(temp[0] > testcase)
         {
             rb = mid - 1;
@@ -296,6 +297,7 @@ unsigned int findMatch(char * data_file, unsigned int testcase)
             lb = rb;
         }
     }
+    fclose(pdata_file);
     return temp[lb];
 }
 
