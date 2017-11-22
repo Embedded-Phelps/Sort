@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 /*********************************** Macros ***********************************/
-#define TEST (1)
+#define TEST (1) //change 1 to other value for the testing of easy_input
 
 #if TEST == 1
 #define TOTAL_DATA_NUM  (1048576)
