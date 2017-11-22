@@ -101,28 +101,41 @@ int main(int argc, char ** argv)
     
     if(argc == 1) {printf("ERROR: no input file.\n"); exit(-1);}
     
+//    FILE* pdata_file;
+//    unsigned int temp;
+//    pdata_file = fopen("sorted.bin", "rb");
+//    fseek(pdata_file, 3*sizeof(unsigned int), SEEK_SET);
+//    fread(&temp, sizeof(unsigned int), 1, pdata_file);
+//    printf("%u\n", temp);
+//    fseek(pdata_file, 6*sizeof(unsigned int), SEEK_SET);
+//    fread(&temp, sizeof(unsigned int), 1, pdata_file);
+//    printf("%u\n", temp);
+//    fseek(pdata_file, 2*sizeof(unsigned int), SEEK_SET);
+//    fread(&temp, sizeof(unsigned int), 1, pdata_file);
+//    printf("%u\n", temp);
+
     /* Read user-input testcases */
     scanf("%u", &num_testcase);
-    //printf("%u\n", num_testcase);
-    
+
     user_testcase = (unsigned int *)malloc(sizeof(unsigned int)*num_testcase);
     if(!user_testcase) {printf("ERROR: testcases buffer not suscessfully allocated.\n"); exit(-1);}
-    
+
     for(i=0; i<num_testcase; i++)
     {
         scanf("%u", user_testcase+i);
     }
-    
-//    for(i=0; i<num_testcase; i++)
-//    {
-//        printf("%u\n", *(user_testcase+i));
-//    }
-    
+
     /* Sorting the input data file in ascending order and write to the 'sorted_file' */
     externalSort(*(argv+1), sorted_file, NUM_WAYS, RUN_SIZE);
-    
-    /* Find matching number for each testcase */
-    //result = findMatch();
+
+    /* Find the matching number for each testcase and print it out*/
+    for(i=0; i<num_testcase; i++)
+    {
+        *(user_testcase+i) = findMatch(sorted_file, *(user_testcase+i));
+        printf("%u\n", *(user_testcase+i));
+    }
+
+    /* Free the buffer */
     free(user_testcase);
     return 0;
 }
@@ -238,6 +251,66 @@ void externalSort(char * input_file, char * output_file, unsigned int num_ways, 
     }
     // Close the file
     fclose(pdata_file);
+}
+
+unsigned int findMatch(char * data_file, unsigned int testcase)
+{
+    FILE * pdata_file;
+    int lb = 0, rb = TOTAL_DATA_NUM-1, mid;
+    int delta, delta_min;
+    unsigned int temp[3];
+    
+    // Open the sorted data file
+    pdata_file = fopen(data_file, "rb");
+    if (!pdata_file) {fputs ("File error", stderr); exit(1);}
+    
+    while(rb >= lb)
+    {
+        mid = lb + (rb - lb)/2;
+        fseek(pdata_file, mid*sizeof(unsigned int), SEEK_SET);
+        fread(temp, sizeof(unsigned int), 1, pdata_file);
+        if(temp[0] == testcase)
+            return temp[0];
+        else if(temp[0] > testcase)
+        {
+            rb = mid - 1;
+        }
+        else
+        {
+            lb = mid + 1;
+        }
+    }
+    
+    if(mid == 0)
+    {
+        fseek(pdata_file, mid * sizeof(unsigned int), SEEK_SET);
+        fread(temp, sizeof(unsigned int), 2, pdata_file);
+        mid = 2;
+    }
+    else if(mid == TOTAL_DATA_NUM-1)
+    {
+        fseek(pdata_file, (mid-1) * sizeof(unsigned int), SEEK_SET);
+        fread(temp, sizeof(unsigned int), 2, pdata_file);
+        mid = 2;
+    }
+    else
+    {
+        fseek(pdata_file, (mid-1) * sizeof(unsigned int), SEEK_SET);
+        fread(temp, sizeof(unsigned int), 3, pdata_file);
+        mid = 3;
+    }
+    lb = 0;
+    delta_min = abs(int(temp[0]-testcase));
+    for(rb=1; rb<mid; rb++)
+    {
+        delta = abs(int(temp[rb]-testcase));
+        if(delta < delta_min)
+        {
+            delta_min = delta;
+            lb = rb;
+        }
+    }
+    return temp[lb];
 }
 
 void convertEndianness(unsigned int * data_buf, unsigned int num)
@@ -358,3 +431,5 @@ MinHeap_t MinHeap_constructHeap(MinHeapNode_t * a, unsigned int size)
     }
     return mp;
 }
+
+
